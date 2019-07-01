@@ -234,3 +234,4 @@ class ReadingGroupViewSet(viewsets.ModelViewSet):
                     return Response(status=status.HTTP_200_OK, data={'Status': 'success',
                                                                      'Message': _('Invitation accepted')})
         return Response(status=status.HTTP_400_BAD_REQUEST, data={'Status': 'error', })
+
