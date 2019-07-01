@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% load i18n %}
+{% block greeting %}
+    <strong>{% trans "Hello there"%} {{ user_name }}!</strong>
+{%endblock  %}
+{% block sub_header %}
+    {% trans "This is an invitation to form part of " %}{{ group_name }} {% trans "reading group" %}
+{% endblock %}
+{% block body %}
+    {{ who_invites }} {% trans "is inviting you to form part of his reading group" %} {{ group_name }}.
+    {% trans "To accept this invitation you just need to lick the next link:" %}
+    <a href="http://{{ domain }}{% url 'accept-group-invitation' pk=pk  uidb64=uid token=token %}" target="_blank">
+        {% trans 'Click here' %}</a>
+{% endblock %}
