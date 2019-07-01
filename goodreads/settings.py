@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'goodreads.urls'
@@ -110,6 +114,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = (
+    ('en', _('English')),
+    ('es', _('Spanish')),
+)
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -128,18 +141,99 @@ REST_FRAMEWORK = {
     # When you enable API versioning, the request.version attribute will contain a string
     # that corresponds to the version requested in the incoming client request.
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer', 'Goodreads')
+}
+
+# Email values
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'adrianminfo90@gmail.com'
+EMAIL_HOST_PASSWORD = 'hijadelafortuna*'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'adrianminfo90@gmail.com'
+SERVER_EMAIL = 'adrianminfo90@gmail.com'
+# EMAIL_USE_SSL = True
+
 # Constants
-GENDER = (('F', 'Female'), ('M', 'Male'), ('X', 'X'))
-PERMISSION_VIEW = (('F', 'Friends only'), ('E', 'Everyone'), ('No', 'No one'))
+GENDER = (('F', _('Female')), ('M', _('Male')), ('X', 'X'))
+PERMISSION_VIEW = (('F', _('Friends only')), ('E', _('Everyone')), ('N', _('No one')))
 AGE_BIRTHDAY_PRIVACY = (
-    ('1', 'Age & birthday to Goodreads members'),
-    ('2', 'Age to Goodreads members, birthday to friends'),
-    ('3', 'Age to Goodreads members, birthday to no one'),
-    ('4', 'Age and birthday to friends'),
-    ('5', 'Age to friends, birthday to no one'),
-    ('6', 'Age and birthday to no one'),
-    ('7', 'Age to no one, birthday to Goodreads members'),
-    ('8', 'Age to no one, birthday to friends')
+    ('1', _('Age & birthday to Goodreads members')),
+    ('2', _('Age to Goodreads members, birthday to friends')),
+    ('3', _('Age to Goodreads members, birthday to no one')),
+    ('4', _('Age and birthday to friends')),
+    ('5', _('Age to friends, birthday to no one')),
+    ('6', _('Age and birthday to no one')),
+    ('7', _('Age to no one, birthday to Goodreads members')),
+    ('8', _('Age to no one, birthday to friends'))
 )
+PROFILE_PERMISSIONS_VIEW = (('A', _('Anyone(including search engines)')), ('G', _('Goodreads members')),
+                            ('F', 'Just my friends'))
+EMAIL_FREQUENCY = (('N', _('Never')), ('D', _('Once a day')), ('W', _('Once a week')))
+COMMENT_NOTIFICATION = (('E', _('an email')), ('N', _('a notification')), ('B', _('both')), ('A', _('Nothing')))
+DISCUSSION_EMAIL_FREQUENCY = (('D', _('Daily')), ('W', _('Weekly')))
+GROUP_GET_EMAIL_FREQUENCY = (('D', _('Digest')), ('I', _('Individual')), ('A', _('All')), ('O', _('Notification only')),
+                             ('N', _('None')))
+GROUP_TOPIC = (('BL', _('Books & Literature')), ('B', _('Business')), ('EA', _('Entertainment & Art')),
+               ('FC', _('Friends & Commons Interests')), ('G', _('Geography')), ('GA', _('Goodreads authors')),
+               ('JF', _('Just for fun')), ('O', _('Organizations')), ('SG', _('Students groups')))
+GROUP_SUBTOPIC = {
+    'BL': (
+        ('AF', _('Arts & Photography')), ('BM', _('Biographies & Memoirs')), ('BI', _('Business & Investing')),
+        ('ChB', _('Children\'s books')), ('CGN', _('Comics & Graphic Novels')), ('CI', _('Computers & Internet')),
+        ('CFW', _('Cooking, Food & Wine')), ('E', _('Entertainment')), ('GL', _('Gay & Lesbian')),
+        ('G',_('General')), ('HMB', _('Health, Mind & Body')), ('H', _('History')), ('HG', _('Home & Garden')),
+        ('HO', _('Horror')), ('LF', _('LIterature & Fiction')), ('MT', _('Mystery & Thrillers')),
+        ('NF', _('Nonfiction')), ('ON', _('Outdoors & Nature')), ('P', _('Parenting & Family')),
+        ('PO', _('Poetry')), ('PT', _('Professional & Technical')), ('RF', _('Reference')),
+        ('RS', _('Religion & Spirituality')), ('RO', _('Romance')), ('S', _('Science')),
+        ('SCF', _('Science Fiction & Fantansy')), ('SP', _('Sports')), ('TR', _('Travels')), ('YA', _('Young Adults'))
+    ),
+    'B': (
+        ('C', _('Companies')), ('CG', _('Consumer Groups')), ('EW', _('Employment & Work')), ('G', _('General')),
+        ('HB', _('Home business')), ('IT', _('Internet & Technology')), ('I', _('Investing')),
+        ('MA', _('Marketing & Advertising')), ('PR', _('Public Realtions')), ('RE', _('Real Estate'))
+    ),
+    'EA': (
+        ('C', _('Celebrities')), ('CA', _('Comics & Animation')), ('D', _('Dance')), ('F', _('Fashion'))
+    ),
+    'FC': (
+        ('A', _('Activities'))
+    ),
+    'G': (
+        ('C', _('Countries'))
+    ),
+    'GA': (
+        ('AF', _('Arts & Photography')), ('BM', _('Biographies & Memoirs')), ('BI', _('Business & Investing')),
+        ('ChB', _('Children\'s books')), ('CGN', _('Comics & Graphic Novels')), ('CI', _('Computers & Internet')),
+        ('CFW', _('Cooking, Food & Wine')), ('E', _('Entertainment')), ('GL', _('Gay & Lesbian')),
+        ('G',_('General')), ('HMB', _('Health, Mind & Body')), ('H', _('History')), ('HG', _('Home & Garden')),
+        ('HO', _('Horror')), ('LF', _('LIterature & Fiction')), ('MT', _('Mystery & Thrillers')),
+        ('NF', _('Nonfiction')), ('ON', _('Outdoors & Nature')), ('P', _('Parenting & Family')),
+        ('PO', _('Poetry')), ('PT', _('Professional & Technical')), ('RF', _('Reference')),
+        ('RS', _('Religion & Spirituality')), ('RO', _('Romance')), ('S', _('Science')),
+        ('SCF', _('Science Fiction & Fantansy')), ('SP', _('Sports')), ('TR', _('Travels')), ('YA', _('Young Adults'))
+    ),
+    'JF': (
+        ('FC', _('Fan Clubs'))
+    ),
+    'O': (
+        ('AO', _('Academic Organizations'))
+    ),
+    'SG': (
+        ('AG', _('Academic Groups'))
+    )
+}
+
+GROUP_PRIVACY = (('PU', _('Public')), ('R', _('Restricted')), ('PR', _('Private')), ('S', _('Secret')))
+
+TEST_IMAGE_PATH = os.path.join(BASE_DIR, 'static/test/test_image.png')
