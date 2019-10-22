@@ -3,6 +3,7 @@ import json
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -84,12 +85,10 @@ class BookViewSet(viewsets.ModelViewSet):
                 "message": "(#500) {}.".format(_('Server error')), "code": 400
             }})
 
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        try:
-            pass
-        except Exception as ex:
-            pass
+    @action(detail=True, methods=['put'], url_name='combine-books')
+    def combine_books(self, request, *args, **kwargs):
+        pass
 
-    def partial_update(self, request, *args, **kwargs):
+    @action(detail=True, methods=['put'], url_name='merge-books')
+    def merge_books(self, request, *args, **kwargs):
         pass
