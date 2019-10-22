@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'languages',
     'apps.accounts',
     'apps.books',
     'django_countries',
@@ -107,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'accounts.UserProfile'
 
 
 # Internationalization
@@ -235,5 +238,34 @@ GROUP_SUBTOPIC = {
 }
 
 GROUP_PRIVACY = (('PU', _('Public')), ('R', _('Restricted')), ('PR', _('Private')), ('S', _('Secret')))
+
+AUTHOR_ROLE = (('AU', _('Author')), ('IL', _('Illustrator')), ('CO', _('Contributor')), ('ED', _('Editor')),
+               ('TR', _('Translator')), ('NA', _('Narrator')))
+
+BOOK_FORMAT = (('PB', _('Paperback')), ('HC', _('Hardcover')), ('KE', _('Kindle Edition')),
+               ('MMP', _('Mass Market paperback')), ('N', _('Nook')), ('E', _('ebook')), ('LB', _('Library Binding')),
+               ('AB', _('Audiobook')), ('AC', _('Audio CD')), ('ACA', _('Audio Cassette')), ('AA', _('Audible Audio')),
+               ('CD', _('CD-ROM')), ('MP3', _('MP3 CD')), ('BB', _('Board book')), ('LB', _('Leather bound')),
+               ('UN', _('Unbound')), ('SB', _('Spiral-bound')), ('UB', _('Unkown bingind')))
+
+MEDIA_TYPE = (('B', _('Book')), ('P', _('Periodical')), ('A', _('Article')), ('NB', _('Not a book')))
+BOOK_GENRE = (('M', _('Mystery')), ('C', _('Comedy')), ('F', _('Fiction')), ('Ch', _('Childrens')),
+              ('A', _('Adventure')), ('R', _('Romance')), ('Ft', _('Fairytale')), ('Th', _('Thriller')),
+              ('Nf', _('Nonfiction')), ('Ws', _('Women\'s studies')), ('Ma', _('Middle age')),
+              ('Mag', _('Young adult')), ('Me', _('Medieval')), ('Fa', _('Multiverse')))
+BOOK_SUBJECTS = (('W', _('War')), ('F', _('Friendship')), ('R', _('Relationships')), ('Re', _('Responsibility')),
+                 ('O', _('Optimism')), ('H', _('Hope')), ('TGO', _('Triumph of good over evil')), ('Fa', _('Fantansy')),
+                 ('Wi', _('Wizard')), ('I', _('Infiltrations')), ('M', _('Murders')), ('Wit', _('Witches')),
+                 ('P', _('Psychology')), ('Inf', _('Infiltrations')), ('Fd', _('Fire demons')))
+
+BOOK_PACE = (('Fp', _('Fast paced')), ('Rp', _('Relaxed-pace')))
+BOOK_TONE = (('H', _('Humor')), ('R', _('Romance')), ('M', _('Mysterious')), ('F', _('Fantasy')), ('A', _('Academic')))
+WRITING_STYLE = (('D', _('Descriptive')), ('W', _('Whimsical')), ('Sp', _('Slightly proper')),
+                 ('AiC', _('As it comes')), ('B', _('Brilliant')))
+NARRATION_PERSPECTIVE = (('3rd', _('3rd person')), ('1st', _('1st person')), ('2nd', _('2dn person')),
+                         ('S', _('Shifting perspectives')))
+BOOK_TIME = (('Pr', _('Present')), ('Pa', _('Past')), ('S', _('Shifting')))
+SHORT_ANSWER = (('Y', _('Yes')), ('N', _('No')))
+CHARACTERS_AMOUNT = (('F', _('Few')), ('M', _('Many')))
 
 TEST_IMAGE_PATH = os.path.join(BASE_DIR, 'static/test/test_image.png')

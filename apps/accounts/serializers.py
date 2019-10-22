@@ -1,28 +1,30 @@
-from django.contrib.auth.models import User
 from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
 
-from apps.accounts.models import UserProfile, Shelve, EmailSettings, FeedSetting, ReadingGroup
+from apps.accounts.models import UserProfile, EmailSettings, FeedSetting, ReadingGroup, ReadingGroupEmailSetting, Role
+from apps.books.models import Shelve
 
 
-class UserSerializer(serializers.ModelSerializer):
+class RoleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        exclude = ['password']
+        model = Role
+        fields = ['id']
 
 
 class UserProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
     shelves = serializers.PrimaryKeyRelatedField(many=True, queryset=Shelve.objects.all(), required=False)
-    user = UserSerializer(read_only=True)
+    email = serializers.SerializerMethodField()
     email_settings = serializers.SerializerMethodField()
     feed_settings = serializers.SerializerMethodField()
+    group_email_settings = serializers.SerializerMethodField()
+    role = RoleSerializer(read_only=True, many=True)
 
     class Meta:
         model = UserProfile
-        fields = ("id", "user", "birthday", "who_can_see_last_name",
+        fields = ("id", "full_name", "birthday", "email", "who_can_see_last_name",
                   "photo", "city", "state", "country", "location_view", "gender", "gender_view",
                   "age_view", "web_site", "interests", "kind_books", "about_me", "shelves",
-                  "email_settings", "feed_settings", "created", "modified")
+                  "email_settings", "feed_settings", "created", "modified", "group_email_settings", "role")
 
     def get_email_settings(self, instance):
         try:
@@ -37,6 +39,19 @@ class UserProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
             return setting.id
         except FeedSetting.DoesNotExist:
             pass
+
+    def get_group_email_settings(self, instance):
+        try:
+            setting_query = ReadingGroupEmailSetting.objects.filter(user_id=instance.id)
+            settings_id = []
+            for setting in setting_query:
+                settings_id.append(setting.id)
+            return settings_id
+        except Exception:
+            pass
+
+    def get_email(self, instance):
+        return instance.email
 
 
 class FeedSettingSerializer(serializers.ModelSerializer):

@@ -2,17 +2,17 @@ import tempfile
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.paginator import Paginator
-from django.test import TestCase
+
 from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile, EmailSettings, FeedSetting, ReadingGroup
+from apps.accounts.models import UserProfile, EmailSettings, FeedSetting, ReadingGroup, ReadingGroupUsers, Role
 from apps.accounts.serializers import UserProfileSerializer, EmailSettingSerializer, FeedSettingSerializer
-from goodreads import settings
+
+from django.utils.translation import gettext_lazy as _
 
 
 class BaseViewTest(APITestCase):
@@ -20,21 +20,23 @@ class BaseViewTest(APITestCase):
     token = {}
 
     @staticmethod
-    def create_user_profile(username, email, password, first_name, last_name, birthday, who_can_see_last_name,
+    def create_roles():
+        for type in Role.ROLE_CHOICES:
+            role = Role(id=type[0])
+            role.save()
+
+    @staticmethod
+    def create_user_profile(username, email, password, full_name, birthday, who_can_see_last_name,
                             photo, city, state, country, location_view, gender, gender_view,
                             age_view, web_site='', interests='', kind_books='', about_me='', active=True):
-        user = User(username=username, email=email, password=make_password(password), first_name=first_name,
-                    last_name=last_name)
+        user = UserProfile(username=username, email=email, password=make_password(password), full_name=full_name,
+                           birthday=birthday, who_can_see_last_name=who_can_see_last_name, photo=photo, city=city,
+                           state=state, country=country, location_view=location_view, gender=gender,
+                           gender_view=gender_view, age_view=age_view, web_site=web_site, interests=interests,
+                           kind_books=kind_books, about_me=about_me, active=active)
         user.save()
-        user_profile = UserProfile(user=user, birthday=birthday, who_can_see_last_name=who_can_see_last_name,
-                                   photo=photo, city=city, state=state, country=country, location_view=location_view,
-                                   gender=gender, gender_view=gender_view, age_view=age_view, web_site=web_site,
-                                   interests=interests, kind_books=kind_books, about_me=about_me, active=active)
-        user_profile.save()
-        email_setting = EmailSettings(user=user_profile)
-        email_setting.save()
-        feed_setting = FeedSetting(user=user_profile)
-        feed_setting.save()
+        role = Role.objects.get(pk=Role.READER)
+        user.roles.add(role)
 
     @staticmethod
     def create_image():
@@ -56,29 +58,30 @@ class BaseViewTest(APITestCase):
         }
 
     def setUp(self):
-        self.create_user_profile('meninleo', 'meninleo@gmail.com', 'meninleo', 'Adrian', 'Mena',
+        self.create_roles()
+        self.create_user_profile('meninleo', 'meninleo@gmail.com', 'meninleo', 'Adrian Mena',
                                  '1990-08-15', 'F', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
                                  1)
-        self.create_user_profile('adrianminfo', 'adrianminfo90@gmail.com', 'adrianminfo', 'Adrian', 'Mena',
+        self.create_user_profile('adrianminfo', 'adrianminfo90@gmail.com', 'adrianminfo', 'Gonzalo Mena',
                                  '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
                                  1)
-        self.create_user_profile('meninleordgz', 'meninleordgz@outllok.es', 'meninleordgz', 'Adrian', 'Mena',
+        self.create_user_profile('meninleordgz', 'meninleordgz@outllok.es', 'meninleordgz', 'Antonio Mena',
                                  '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
                                  1)
-        user = User.objects.get(pk=1)
+        user = UserProfile.objects.get(pk=1)
         self.token = self.get_tokens_for_user(user)
         self.client.credentials(HTTP_AUTHORIZATION='Goodreads ' + self.token['access'])
 
-        group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL',
-                             tags='tags,he,binhe', country='US', creator_id=1)
-        group.save()
+        reading_group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL',
+                                     tags='tags,he,binhe', country='US', creator_id=1)
+        reading_group.save()
 
 
 class UserProfileTests(BaseViewTest):
 
     user_profile_data = {
         'email': 'diadokos@gmail.com',
-        'first_name': 'Raul',
+        'full_name': 'Raul',
         'password': 'diadokos',
         'birthday': '1988-12-05',
         'who_can_see_last_name': 'F',
@@ -93,9 +96,28 @@ class UserProfileTests(BaseViewTest):
         'interests': 'Books,Friends,Video games',
         'kind_books': 'CyFy',
         'about_me': 'Nothing to add.',
-        'location_view': 'F',
-        'user_id': 1
+        'location_view': 'F'
+
     }
+
+    def test_create_user_profile(self):
+        """
+        This test ensures that a new user profile is created with the provided information.
+        :return:
+        """
+        self.user_profile_data['photo'] = self.create_image()
+        response = self.client.post(reverse('user-profile-create'), self.user_profile_data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data['email_settings'])
+        self.assertTrue(response.data['feed_settings'])
+
+    def test_create_user_profile_fail(self):
+        data = {
+            'email': 'roberto@gmail.com.x',
+            'password': 'test1234*'
+        }
+        response = self.client.post(reverse("user-profile-create"), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_all_profiles(self):
         """
@@ -106,8 +128,8 @@ class UserProfileTests(BaseViewTest):
         response = self.client.get(reverse("user-profile-list"))
         expected = UserProfile.objects.filter(active=True)
         serialized = UserProfileSerializer(expected, many=True)
-        self.assertEqual(response.data['results'], serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['results'], serialized.data)
 
     def test_get_detail(self):
         """
@@ -121,29 +143,19 @@ class UserProfileTests(BaseViewTest):
         serialized = UserProfileSerializer(expected)
         self.assertEqual(response.data, serialized.data)
 
-    def test_create_user_profile(self):
+    def test_update_user_profile_fail_forbidden(self):
         """
-        This test ensures that a new user profile is created with the provided information.
-        :return:
-        """
-        self.user_profile_data['photo'] = self.create_image()
-        response = self.client.post(reverse('user-profile-list'), self.user_profile_data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response.data['email_settings'])
-        self.assertTrue(response.data['feed_settings'])
 
-    def test_create_user_profile_fail(self):
-        """
-        Missing data
         :return:
         """
-        response = self.client.post(reverse('user-profile-list'), {})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.patch(reverse('user-profile-detail', kwargs={"pk": 2}), self.user_profile_data,
+                                     format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_user_profile(self):
         self.user_profile_data['photo'] = self.create_image()
-        response = self.client.put(reverse('user-profile-detail', kwargs={"pk": 1}), self.user_profile_data,
-                                   format='multipart')
+        response = self.client.patch(reverse('user-profile-detail', kwargs={"pk": 1}), self.user_profile_data,
+                                     format='multipart')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_user_profile(self):
@@ -151,7 +163,7 @@ class UserProfileTests(BaseViewTest):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         expected = UserProfile.objects.get(pk=2)
         self.assertTrue(not expected.active)
-        self.assertTrue(not expected.user.is_active)
+        self.assertTrue(not expected.is_active)
 
     def test_get_email_setting(self):
         response = self.client.get(reverse('user-profile-get-email-settings', args=[1]))
@@ -160,12 +172,34 @@ class UserProfileTests(BaseViewTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized.data)
 
+    def test_get_email_setting_permission_denied(self):
+        response = self.client.get(reverse('user-profile-get-email-settings', args=[3]))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_get_feed_setting(self):
         response = self.client.get(reverse('user-profile-get-feed-settings', args=[1]))
         expected = FeedSetting.objects.get(user_id=1)
         serialized = FeedSettingSerializer(expected)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized.data)
+
+    def test_accept_group_invitation(self):
+        invitation = ReadingGroupUsers(user_id=3, group_id=1, who_invites_id=1)
+        invitation.save()
+
+        response = self.client.put(reverse('user-profile-accept-group-invitation', kwargs={'pk': 1}), {'userId': 3})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['Message'], _('Invitation accepted'))
+
+    def test_accept_group_invitation_400_user_grou_not_found(self):
+        response = self.client.put(reverse('user-profile-accept-group-invitation', kwargs={'pk': 1}), {'userId': 8})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Message'], _('Check user and group.'))
+
+    def test_accept_group_invitation_400_not_invited(self):
+        response = self.client.put(reverse('user-profile-accept-group-invitation', kwargs={'pk': 1}), {'userId': 2})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['Message'], _('User hasn\'t been invited to be part of this group.'))
 
 
 class EmailSettingTests(BaseViewTest):
@@ -263,6 +297,12 @@ class ReadingGroupTests(BaseViewTest):
     def test_create_group(self):
         response = self.client.post(reverse('reading-group-list'), self.group_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], self.group_data['name'])
+
+    def test_create_group_fail_unauthorized(self):
+        self.client.logout()
+        response = self.client.post(reverse('reading-group-list'), self.group_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_group(self):
         group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL', tags=
@@ -271,26 +311,43 @@ class ReadingGroupTests(BaseViewTest):
         response = self.client.put(reverse('reading-group-detail', kwargs={'pk': group.id}), self.group_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_update_group_fail_forbidden(self):
+        group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL', tags=
+                             'tags,he,binhe', country='US', creator_id=2)
+        group.save()
+        response = self.client.put(reverse('reading-group-detail', kwargs={'pk': group.id}), self.group_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_delete_group(self):
         group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL', tags=
                              'tags,he,binhe', country='US', creator_id=1)
         group.save()
-        response = self.client.delete(reverse('reading-group-detail', kwargs={'pk':group.id}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete(reverse('reading-group-detail', kwargs={'pk': group.id}))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         group.refresh_from_db()
         self.assertEqual(group.active, False)
 
-    def test_add_user_to_group(self):
+    def test_delete_group_fail_forbidden(self):
         group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL', tags=
-                             'tags,he,binhe', country='US', creator_id=1)
+                             'tags,he,binhe', country='US', creator_id=2)
         group.save()
-        self.assertEqual(9, 9)
+        response = self.client.delete(reverse('reading-group-detail', kwargs={'pk': group.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_send_invitation_user(self):
+    def test_user_invitation(self):
         data = {
             'user_id': 1
         }
-        url = reverse('reading-group-send-user-invitation',  kwargs={'pk': 1})
-        response = self.client.post(reverse('reading-group-send-user-invitation', kwargs={'pk': 1}), data)
+        response = self.client.post(reverse('reading-group-create-user-invitation', kwargs={'pk': 1}), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['Message'], 'Invitation send it successfully')
+        self.assertEqual(response.data['Message'], 'Invitation successfully created')
+
+    def test_user_invitation_fail_unauthorized(self):
+        group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL',
+                             tags='tags,he,binhe', country='US', creator_id=2)
+        group.save()
+        data = {
+            'user_id': 1
+        }
+        response = self.client.post(reverse('reading-group-create-user-invitation', kwargs={'pk': group.id}), data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

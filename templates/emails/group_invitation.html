@@ -9,6 +9,6 @@
 {% block body %}
     {{ who_invites }} {% trans "is inviting you to form part of his reading group" %} {{ group_name }}.
     {% trans "To accept this invitation you just need to lick the next link:" %}
-    <a href="http://{{ domain }}{% url 'accept-group-invitation' pk=pk  uidb64=uid token=token %}" target="_blank">
+    <a href="http://{{ domain }}{% url 'accept-group-invitation-email' pk=pk  uidb64=uid token=token %}" target="_blank">
         {% trans 'Click here' %}</a>
 {% endblock %}

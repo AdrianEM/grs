@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load staticfiles %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -488,7 +489,7 @@
                                         <![endif]-->
                                         <div style="font-size:1px;line-height:10px"> </div>
                                         <img align="center" alt="Image" border="0" class="center autowidth fullwidth"
-                                             src="images/divider.png"
+                                             src="{% static "accounts/email/divider.png" %}"
                                              style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; border: 0; height: auto; float: none; width: 100%; max-width: 634px; display: block;"
                                              title="Image" width="634"/>
                                         <!--[if mso]></td></tr></table><![endif]-->
@@ -596,7 +597,7 @@
                                          style="padding-right: 0px;padding-left: 0px;">
                                         <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center">
                                         <![endif]--><img align="center" alt="Image" border="0" class="center fixedwidth"
-                                                         src="images/face.png"
+                                                         src="{% static 'accounts/email/images/face.png'%}"
                                                          style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; border: 0; height: auto; float: none; width: 100%; max-width: 158px; display: block;"
                                                          title="Image" width="158"/>
                                         <!--[if mso]></td></tr></table><![endif]-->
@@ -610,58 +611,7 @@
                                         </div>
                                     </div>
                                     <!--[if mso]></td></tr></table><![endif]-->
-                                    <table cellpadding="0" cellspacing="0" class="social_icons" role="presentation"
-                                           style="table-layout: fixed; vertical-align: top; border-spacing: 0; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           valign="top" width="100%">
-                                        <tbody>
-                                        <tr style="vertical-align: top;" valign="top">
-                                            <td style="word-break: break-word; vertical-align: top; padding-top: 5px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; border-collapse: collapse;"
-                                                valign="top">
-                                                <table activate="activate" align="center" alignment="alignment"
-                                                       cellpadding="0" cellspacing="0" class="social_table"
-                                                       role="presentation"
-                                                       style="table-layout: fixed; vertical-align: top; border-spacing: 0; border-collapse: undefined; mso-table-tspace: 0; mso-table-rspace: 0; mso-table-bspace: 0; mso-table-lspace: 0;"
-                                                       to="to" valign="top">
-                                                    <tbody>
-                                                    <tr align="center"
-                                                        style="vertical-align: top; display: inline-block; text-align: center;"
-                                                        valign="top">
-                                                        <td style="word-break: break-word; vertical-align: top; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; border-collapse: collapse;"
-                                                            valign="top"><a href="https://www.facebook.com/"
-                                                                            target="_blank"><img alt="Facebook"
-                                                                                                 height="32"
-                                                                                                 src="images/facebook@2x.png"
-                                                                                                 style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; height: auto; float: none; border: none; display: block;"
-                                                                                                 title="Facebook"
-                                                                                                 width="32"/></a></td>
-                                                        <td style="word-break: break-word; vertical-align: top; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; border-collapse: collapse;"
-                                                            valign="top"><a href="https://twitter.com/" target="_blank"><img
-                                                                alt="Twitter" height="32" src="images/twitter@2x.png"
-                                                                style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; height: auto; float: none; border: none; display: block;"
-                                                                title="Twitter" width="32"/></a></td>
-                                                        <td style="word-break: break-word; vertical-align: top; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; border-collapse: collapse;"
-                                                            valign="top"><a href="https://instagram.com/"
-                                                                            target="_blank"><img alt="Instagram"
-                                                                                                 height="32"
-                                                                                                 src="images/instagram@2x.png"
-                                                                                                 style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; height: auto; float: none; border: none; display: block;"
-                                                                                                 title="Instagram"
-                                                                                                 width="32"/></a></td>
-                                                        <td style="word-break: break-word; vertical-align: top; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; border-collapse: collapse;"
-                                                            valign="top"><a href="https://www.linkedin.com/"
-                                                                            target="_blank"><img alt="LinkedIn"
-                                                                                                 height="32"
-                                                                                                 src="images/linkedin@2x.png"
-                                                                                                 style="outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; clear: both; height: auto; float: none; border: none; display: block;"
-                                                                                                 title="LinkedIn"
-                                                                                                 width="32"/></a></td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+
                                     <!--[if (!mso)&(!IE)]><!-->
                                 </div>
                                 <!--<![endif]-->
