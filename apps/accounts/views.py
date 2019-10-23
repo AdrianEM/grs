@@ -68,7 +68,7 @@ class IsShelveOwner(permissions.BasePermission):
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.user == obj or any(role.id == Role.ADMIN or role.id == Role.STAFF for role in request.user.roles):
+        if request.user == obj or any(role.id == Role.ADMIN or role.id == Role.STAFF for role in request.user.roles.all()):
             return True
         return False
 

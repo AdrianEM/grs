@@ -1,12 +1,11 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django_countries.fields import CountryField
 from languages.fields import LanguageField
 from model_utils.models import TimeStampedModel
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import UserProfile
-from goodreads.settings import AUTHOR_ROLE, BOOK_FORMAT, MEDIA_TYPE, BOOK_GENRE, BOOK_PACE, BOOK_TONE, WRITING_STYLE, \
+from goodreads.settings import AUTHOR_ROLE, BOOK_FORMAT, MEDIA_TYPE, BOOK_PACE, BOOK_TONE, WRITING_STYLE, \
     NARRATION_PERSPECTIVE, BOOK_TIME
 
 

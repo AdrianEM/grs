@@ -10,12 +10,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile, EmailSettings, FeedSetting, ReadingGroup, ReadingGroupUsers
-from apps.accounts.serializers import UserProfileSerializer, EmailSettingSerializer, FeedSettingSerializer
+from apps.accounts.models import UserProfile
 
-from django.utils.translation import gettext_lazy as _
-
-from apps.books.models import Genre
+from apps.books.models import Genre, Book
 
 
 class BaseViewTest(APITestCase):
@@ -23,16 +20,16 @@ class BaseViewTest(APITestCase):
     token = {}
 
     @staticmethod
-    def create_user_profile(username, email, password, first_name, last_name, birthday, who_can_see_last_name,
+    def create_user_profile(username, email, password, full_name, birthday, who_can_see_last_name,
                             photo, city, state, country, location_view, gender, gender_view,
                             age_view, web_site="", interests="", kind_books="", about_me="", active=True):
-        user = User(username=username, email=email, password=make_password(password), first_name=first_name,
-                    last_name=last_name)
-        user.save()
-        user_profile = UserProfile(user=user, birthday=birthday, who_can_see_last_name=who_can_see_last_name,
-                                   photo=photo, city=city, state=state, country=country, location_view=location_view,
-                                   gender=gender, gender_view=gender_view, age_view=age_view, web_site=web_site,
-                                   interests=interests, kind_books=kind_books, about_me=about_me, active=active)
+
+        user_profile = UserProfile(username=username, email=email, password=make_password(password),
+                                   full_name=full_name, birthday=birthday,
+                                   who_can_see_last_name=who_can_see_last_name, photo=photo, city=city, state=state,
+                                   country=country, location_view=location_view, gender=gender, gender_view=gender_view,
+                                   age_view=age_view, web_site=web_site, interests=interests, kind_books=kind_books,
+                                   about_me=about_me, active=active)
         user_profile.save()
 
     @staticmethod
@@ -56,15 +53,20 @@ class BaseViewTest(APITestCase):
 
     @staticmethod
     def create_genre_for_book_tests():
-        genre = Genre(name="Ficcion")
+        genre = Genre(name="Fiction")
         genre.save()
         return genre
 
+    @staticmethod
+    def generate_book(data):
+        book = Book(title=data['title'], sort_by_title=data['sort_by_title'], isbn='')
+        book.save()
+
     def setUp(self):
-        self.create_user_profile("meninleo", "meninleo@gmail.com", "meninleo", "Adrian", "Mena",
+        self.create_user_profile("meninleo", "meninleo@gmail.com", "meninleo", "Adrian Mena",
                                  "1990-08-15", "F", "", "Montevideo", "Montevideo", "NZ", "F", "M", "F",
                                  1)
-        user = User.objects.get(pk=1)
+        user = UserProfile.objects.get(pk=1)
         self.token = self.get_tokens_for_user(user)
         self.client.credentials(HTTP_AUTHORIZATION="Goodreads " + self.token["access"])
 
@@ -114,6 +116,7 @@ class BookTests(BaseViewTest):
         self.assertEqual(self.book_data['title'], response.data['title'])
 
     def test_create_book_fail(self):
+        self.generate_book(self.book_data)
         response = self.client.post(reverse("books-list"))
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
