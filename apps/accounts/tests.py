@@ -144,10 +144,6 @@ class UserProfileTests(BaseViewTest):
         self.assertEqual(response.data, serialized.data)
 
     def test_update_user_profile_fail_forbidden(self):
-        """
-
-        :return:
-        """
         response = self.client.patch(reverse('user-profile-detail', kwargs={"pk": 2}), self.user_profile_data,
                                      format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -191,7 +187,7 @@ class UserProfileTests(BaseViewTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['Message'], _('Invitation accepted'))
 
-    def test_accept_group_invitation_400_user_grou_not_found(self):
+    def test_accept_group_invitation_400_user_group_not_found(self):
         response = self.client.put(reverse('user-profile-accept-group-invitation', kwargs={'pk': 1}), {'userId': 8})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['Message'], _('Check user and group.'))

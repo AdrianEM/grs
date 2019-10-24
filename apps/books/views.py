@@ -56,7 +56,7 @@ class BookViewSet(viewsets.ModelViewSet):
             media_type = request.data.get('media_type', '')
             book = Book(title=title, sort_by_title=sort_by_title, isbn=isbn, publisher=publisher, published=published,
                         pages=pages, format=format_, description=description, edition_language=language,
-                        orig_title=orig_title, orig_pub_date=orig_pub_date, media_type=media_type)
+                        orig_title=orig_title, orig_pub_date=orig_pub_date, media_type=media_type, user=request.user)
             book.save()
             for author in authors:
                 first_name = author.get('first_name', '')
@@ -75,10 +75,14 @@ class BookViewSet(viewsets.ModelViewSet):
                 if not BookAuthor.objects.filter(author=author, book=book).exists():
                     book_author = BookAuthor.objects.create(author=author, book=book)
                     book_author.save()
-            book_metadata = BookMetadata(book=book, user=request.user.user_profile)
+            book_metadata = BookMetadata(book=book, user=request.user)
             book_metadata.save()
             serialized = BookSerializer(book)
             return Response(status=status.HTTP_201_CREATED, data=serialized.data)
+        except AttributeError as ex:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": {
+                "message": "(#400) {}.".format(ex.__str__()), "code": 400
+            }})
 
         except Exception as ex:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data={"error": {

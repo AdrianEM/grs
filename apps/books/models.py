@@ -10,6 +10,7 @@ from goodreads.settings import AUTHOR_ROLE, BOOK_FORMAT, MEDIA_TYPE, BOOK_PACE, 
 
 
 class Book(TimeStampedModel):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title = models.CharField(max_length=150, help_text=_('Book\'s title.'))
     sort_by_title = models.CharField(max_length=150, help_text=_('Sort by title'))
     authors = models.ManyToManyField('Author', through='BookAuthor')

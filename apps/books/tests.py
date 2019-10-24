@@ -59,7 +59,11 @@ class BaseViewTest(APITestCase):
 
     @staticmethod
     def generate_book(data):
-        book = Book(title=data['title'], sort_by_title=data['sort_by_title'], isbn='')
+        book = Book(title=data['title'], sort_by_title=data['sort_by_title'], isbn=data['isbn'],
+                    publisher=data['publisher'], published=data['published'], pages=data['pages'],
+                    edition=data['edition'], format=data['format'], description=data['description'],
+                    edition_language=data['edition_language'], orig_title=data['orig_title'],
+                    orig_pub_date=data['orig_pub_date'], media_type=data['media_type'])
         book.save()
 
     def setUp(self):
@@ -116,7 +120,20 @@ class BookTests(BaseViewTest):
         self.assertEqual(self.book_data['title'], response.data['title'])
 
     def test_create_book_fail(self):
-        self.generate_book(self.book_data)
         response = self.client.post(reverse("books-list"))
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        self.assertEqual('(#400) Missing one or all required fields, title sort_by_title and authors.',
+                         response.data['error']['message'])
+
+    def test_create_book_unauthorized(self):
+        self.client.logout()
+        payload = json.dumps(self.book_data)
+        response = self.client.post(reverse("books-list"), data=payload, content_type='application/json')
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_create_book_fail_server_error(self):
+        self.book_data['edition_language'] = 45
+        payload = json.dumps(self.book_data)
+        response = self.client.post(reverse("books-list"), data=payload, content_type='application/json')
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
 
