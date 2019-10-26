@@ -14,7 +14,7 @@ from apps.books.serializers import BookSerializer
 
 class IsLibrarian(permissions.BasePermission):
     def has_permission(self, request, view):
-        if any(role.id == Role.LIBRARIAN for role in request.user.roles):
+        if any(role.id == Role.LIBRARIAN for role in request.user.roles.all()):
             return True
         return False
 
@@ -79,15 +79,14 @@ class BookViewSet(viewsets.ModelViewSet):
             book_metadata.save()
             serialized = BookSerializer(book)
             return Response(status=status.HTTP_201_CREATED, data=serialized.data)
-        except AttributeError as ex:
+        except ValueError as ex:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": {
                 "message": "(#400) {}.".format(ex.__str__()), "code": 400
             }})
 
         except Exception as ex:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data={"error": {
-                "message": "(#500) {}.".format(_('Server error')), "code": 400
-            }})
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            data={"message": "(#500) {}.".format(_('Server error'))})
 
     @action(detail=True, methods=['put'], url_name='combine-books')
     def combine_books(self, request, *args, **kwargs):

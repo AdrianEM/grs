@@ -14,67 +14,7 @@ from apps.accounts.serializers import UserProfileSerializer, EmailSettingSeriali
 
 from django.utils.translation import gettext_lazy as _
 
-
-class BaseViewTest(APITestCase):
-    client = APIClient()
-    token = {}
-
-    @staticmethod
-    def create_roles():
-        for type in Role.ROLE_CHOICES:
-            role = Role(id=type[0])
-            role.save()
-
-    @staticmethod
-    def create_user_profile(username, email, password, full_name, birthday, who_can_see_last_name,
-                            photo, city, state, country, location_view, gender, gender_view,
-                            age_view, web_site='', interests='', kind_books='', about_me='', active=True):
-        user = UserProfile(username=username, email=email, password=make_password(password), full_name=full_name,
-                           birthday=birthday, who_can_see_last_name=who_can_see_last_name, photo=photo, city=city,
-                           state=state, country=country, location_view=location_view, gender=gender,
-                           gender_view=gender_view, age_view=age_view, web_site=web_site, interests=interests,
-                           kind_books=kind_books, about_me=about_me, active=active)
-        user.save()
-        role = Role.objects.get(pk=Role.READER)
-        user.roles.add(role)
-
-    @staticmethod
-    def create_image():
-        from PIL import Image
-
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
-            image = Image.new('RGB', (200, 200), 'white')
-            image.save(f, 'PNG')
-
-        return open(f.name, mode='rb')
-
-    @staticmethod
-    def get_tokens_for_user(user):
-        refresh = RefreshToken.for_user(user)
-
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
-    def setUp(self):
-        self.create_roles()
-        self.create_user_profile('meninleo', 'meninleo@gmail.com', 'meninleo', 'Adrian Mena',
-                                 '1990-08-15', 'F', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
-                                 1)
-        self.create_user_profile('adrianminfo', 'adrianminfo90@gmail.com', 'adrianminfo', 'Gonzalo Mena',
-                                 '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
-                                 1)
-        self.create_user_profile('meninleordgz', 'meninleordgz@outllok.es', 'meninleordgz', 'Antonio Mena',
-                                 '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
-                                 1)
-        user = UserProfile.objects.get(pk=1)
-        self.token = self.get_tokens_for_user(user)
-        self.client.credentials(HTTP_AUTHORIZATION='Goodreads ' + self.token['access'])
-
-        reading_group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL',
-                                     tags='tags,he,binhe', country='US', creator_id=1)
-        reading_group.save()
+from test.base import BaseViewTest
 
 
 class UserProfileTests(BaseViewTest):
@@ -99,6 +39,25 @@ class UserProfileTests(BaseViewTest):
         'location_view': 'F'
 
     }
+
+    def setUp(self):
+        self.create_roles()
+        self.create_user_profile('meninleo', 'meninleo@gmail.com', 'meninleo', 'Adrian Mena',
+                                 '1990-08-15', 'F', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
+                                 1, 1)
+        self.create_user_profile('adrianminfo', 'adrianminfo90@gmail.com', 'adrianminfo', 'Gonzalo Mena',
+                                 '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
+                                 1, 1)
+        self.create_user_profile('meninleordgz', 'meninleordgz@outllok.es', 'meninleordgz', 'Antonio Mena',
+                                 '1990-08-15', 'M', '', 'Montevideo', 'Montevideo', 'NZ', 'F', 'M', 'F',
+                                 1, 1)
+        user = UserProfile.objects.get(pk=1)
+        self.token = self.get_tokens_for_user(user)
+        self.client.credentials(HTTP_AUTHORIZATION='Goodreads ' + self.token['access'])
+
+        reading_group = ReadingGroup(name='Hello New York', description='description', rules='rules', topic='BL',
+                                     tags='tags,he,binhe', country='US', creator_id=1)
+        reading_group.save()
 
     def test_create_user_profile(self):
         """

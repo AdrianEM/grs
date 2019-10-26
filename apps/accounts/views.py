@@ -83,7 +83,6 @@ class IsReadingGroupAdmin(permissions.BasePermission):
         return False
 
 
-# TODO: how  to handle permissions
 class UsersProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
@@ -99,42 +98,6 @@ class UsersProfileViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
         return [permission() for permission in permission_classes]
-
-    # def partial_update(self, request, *args, **kwargs):
-    #     user_id = kwargs.get('pk', None)
-    #     if user_id:
-    #         try:
-    #             user = UserProfile.objects.get(pk=user_id)
-    #         except User.DoesNotExist:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": {
-    #                 "message": "(#400) Can't find the user profile.",
-    #                 "code": 400
-    #             }})
-    #         email = request.data.get('email', None)
-    #         password = request.data.get('password', None)
-    #         first_name = request.data.get('first_name', None)
-    #         last_name = request.data.get('last_name', None)
-    #         should_update = False
-    #         if email:
-    #             if UserProfile.objects.exist_email(email, user):
-    #                 return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": {
-    #                     "message": "(#400) The email provided belongs to another account.",
-    #                     "code": 400
-    #                 }})
-    #             user.email = email
-    #             should_update = True
-    #         if password:
-    #             user.set_password(password)
-    #             should_update = True
-    #         if first_name:
-    #             user.first_name = first_name
-    #             should_update = True
-    #         if last_name:
-    #             user.last_name = last_name
-    #             should_update = True
-    #         if should_update:
-    #             user.save()
-    #     return super(UsersProfileViewSet, self).partial_update(request)
 
     def destroy(self, request, *args, **kwargs):
         pk = kwargs.get('pk', None)
