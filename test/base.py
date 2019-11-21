@@ -14,8 +14,8 @@ class BaseViewTest(APITestCase):
 
     @staticmethod
     def create_roles():
-        for type in Role.ROLE_CHOICES:
-            role = Role(id=type[0])
+        for typ in Role.ROLE_CHOICES:
+            role = Role(id=typ[0])
             role.save()
 
     @staticmethod

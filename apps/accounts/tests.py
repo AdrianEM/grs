@@ -1,13 +1,6 @@
-import tempfile
-
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
-
 from django.urls import reverse
 
 from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import UserProfile, EmailSettings, FeedSetting, ReadingGroup, ReadingGroupUsers, Role
 from apps.accounts.serializers import UserProfileSerializer, EmailSettingSerializer, FeedSettingSerializer

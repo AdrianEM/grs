@@ -1,3 +1,4 @@
+import base64
 import json
 from django.urls import reverse
 
@@ -5,7 +6,7 @@ from rest_framework import status
 
 from apps.accounts.models import UserProfile
 
-from apps.books.models import Genre, Book
+from apps.books.models import Genre, Book, BookSeries, BookEdition, Author
 from test.base import BaseViewTest
 
 
@@ -44,18 +45,46 @@ class BookTests(BaseViewTest):
         "orig_title": "La isla Infinita",
         "orig_pub_date": "2015-01-03",
         "media_type": "B",
-        "user_id": 1
+        "user_id": 1,
+        "series_name": "La isla",
+        "series_number": 1,
+        "series": 1
     }
 
     @staticmethod
+    def create_series(series_name='Testing cook book'):
+        series = BookSeries(name=series_name)
+        series.save()
+        return series
+
+    @staticmethod
+    def create_edition(data, book):
+        edition = BookEdition(published=data['published'], publisher=data['publisher'], isbn=data['isbn'],
+                              edition=data['edition'], pages=data['pages'], format=data['format'],
+                              description=data['description'], language=data['language'], cover=data['cover'],
+                              book=book)
+        edition.save()
+        return edition
+
+    @staticmethod
     def generate_book(data):
-        book = Book(title=data['title'], sort_by_title=data['sort_by_title'], isbn=data['isbn'],
-                    publisher=data['publisher'], published=data['published'], pages=data['pages'],
-                    edition=data['edition'], format=data['format'], description=data['description'],
-                    edition_language=data['language'], orig_title=data['orig_title'],
-                    orig_pub_date=data['orig_pub_date'], media_type=data['media_type'], user_id=data['user_id'])
+        series = BookTests.create_series()
+        book = Book(title=data['title'], sort_by_title=data['sort_by_title'], orig_title=data['orig_title'],
+                    orig_pub_date=data['orig_pub_date'], media_type=data['media_type'], user_id=data['user_id'],
+                    series=series)
         book.save()
         return book
+
+    @staticmethod
+    def create_authors(authors=None):
+        created = []
+        for author in authors:
+            author = Author.objects.filter(first_name=author['first_name'], last_name=author['last_name']).first()
+            if not author:
+                author = Author(first_name=author['first_name'], last_name=author['last_name'], role=author['role'])
+                author.save()
+            created.append(author)
+        return created
 
     def login(self, user=None):
         if not user:

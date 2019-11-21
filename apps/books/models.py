@@ -12,23 +12,41 @@ from goodreads.settings import AUTHOR_ROLE, BOOK_FORMAT, MEDIA_TYPE, BOOK_PACE, 
 class Book(TimeStampedModel):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title = models.CharField(max_length=150, help_text=_('Book\'s title.'))
-    sort_by_title = models.CharField(max_length=150, help_text=_('Sort by title'))
+    sort_by_title = models.CharField(max_length=150, help_text=_('Sort by title'), db_column='sortByTitle')
     authors = models.ManyToManyField('Author', through='BookAuthor')
-    isbn = models.BigIntegerField(help_text=_('ISBN'), null=True)
+    orig_title = models.CharField(max_length=150, help_text=_('Original title'), null=True, db_column='origTitle')
+    orig_pub_date = models.DateField(null=True, help_text=_('Original publication date'), db_column='origPubDate')
+    media_type = models.CharField(choices=MEDIA_TYPE, max_length=2, default='B', db_column='mediaType')
+    series = models.ForeignKey('BookSeries', on_delete=models.CASCADE)
+    series_number = models.IntegerField(null=True, db_column='SeriesNumber')
+
+    class Meta:
+        db_table = 'Book'
+
+
+class BookAuthor(models.Model):
+    author = models.ForeignKey('Author', on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    primary_author = models.IntegerField(null=True, db_column='PrimaryAuthor', help_text=_('Primary author'))
+
+    class Meta:
+        db_table = 'BookAuthor'
+
+
+class BookEdition(TimeStampedModel):
+    isbn = models.BigIntegerField(help_text=_('ISBN'), null=True, unique=True)
     publisher = models.CharField(max_length=150, help_text=_('Publisher'), null=True)
     published = models.DateField(help_text=_('Published'), null=True)
     pages = models.IntegerField(help_text=_('Number of pages'), null=True)
     edition = models.CharField(max_length=150, help_text=_('Edition'), null=True)
     format = models.CharField(choices=BOOK_FORMAT, help_text=_('Format'), max_length=3, default='PB')
     description = models.TextField(help_text=_('Description'), null=True)
-    edition_language = LanguageField(default='en')
-    # Work settings
-    orig_title = models.CharField(max_length=150, help_text=_('Original title'), null=True)
-    orig_pub_date = models.DateField(null=True, help_text=_('Original publication date'))
-    media_type = models.CharField(choices=MEDIA_TYPE, max_length=2, default='B')
+    language = LanguageField(default='en')
+    book = models.ForeignKey('Book', on_delete=models.CASCADE)
+    cover = models.ImageField(null=True)
 
     class Meta:
-        db_table = 'Book'
+        db_table = 'BookEdition'
 
 
 class BookReview(TimeStampedModel):
@@ -39,6 +57,13 @@ class BookReview(TimeStampedModel):
 
     class Meta:
         db_table = 'BookReview'
+
+
+class BookSeries(TimeStampedModel):
+    name = models.CharField(max_length=150, help_text=_('Name'))
+
+    class Meta:
+        db_table = 'BookSeries'
 
 
 class Genre(TimeStampedModel):
@@ -55,11 +80,6 @@ class Author(TimeStampedModel):
 
     class Meta:
         db_table = 'Author'
-
-
-class BookAuthor(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
 
 
 class BookMetadata(TimeStampedModel):
@@ -85,6 +105,9 @@ class BookMetadata(TimeStampedModel):
     strong_male_character = models.BooleanField(null=True, help_text=_('Do you think there is a strong male character'
                                                                        ' in this book?'))
     few_characters = models.BooleanField(null=True, help_text=_('Does this book follow a few characters or many?'))
+
+    class Meta:
+        db_table = 'BookMetadata'
 
 
 class Shelve(TimeStampedModel):
