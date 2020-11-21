@@ -152,9 +152,33 @@ class BookTests(BaseViewTest):
         self.client.logout()
         user = UserProfile.objects.get(username='diadokos')
         self.login(user)
-        self.book_data['user'] = user.id
         response = self.client.patch(reverse('book-detail', kwargs={'pk': book.id}),
-                                   {'title': 'El general no tiene quien le escriba cartas'})
+                                     {'title': 'El general no tiene quien le escriba cartas'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         book.refresh_from_db()
         self.assertEqual(book.title, response.data['title'])
+
+    def test_book_partial_update_user_field_forbidden(self):
+        book = self.generate_book(self.book_data)
+        self.client.logout()
+        user = UserProfile.objects.get(username='diadokos')
+        self.login(user)
+        response = self.client.patch(reverse('book-detail', kwargs={'pk': book.id}),
+                                     {'user_id': '2'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_book_partial_update_authors_field(self):
+        book = self.generate_book(self.book_data)
+        self.client.logout()
+        user = UserProfile.objects.get(username='diadokos')
+        self.login(user)
+        response = self.client.patch(reverse('book-detail', kwargs={'pk': book.id}),
+                                     { "authors" :[
+                                         {
+                                             "first_name": "Mena",
+                                             "last_name": "Conde",
+                                             "role": "AU"
+                                         }
+                                     ]}
+                                     )
+        a = 0

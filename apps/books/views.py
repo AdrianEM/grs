@@ -27,7 +27,7 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         permissions_classes = [IsAuthenticated]
-        librarian_actions = ['update', 'partial_update']
+        librarian_actions = ['update', 'partial_update', 'combine_books', 'merge_books']
         if self.action in librarian_actions:
             permissions_classes.append(IsLibrarian)
         return [permission() for permission in permissions_classes]
@@ -122,6 +122,13 @@ class BookViewSet(viewsets.ModelViewSet):
         except Exception as ex:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             data={"message": "(#500) {}.".format(_('Server error'))})
+
+    def partial_update(self, request, *args, **kwargs):
+        field_to_change = request.data.get('user_id', None)
+        if field_to_change:
+            return Response(status=status.HTTP_403_FORBIDDEN,
+                            data={"message": _("It's forbidden to modify the user who created the book")})
+        return super().partial_update(request, *args, **kwargs)
 
     @action(detail=True, methods=['put'], url_name='combine-books')
     def combine_books(self, request, *args, **kwargs):

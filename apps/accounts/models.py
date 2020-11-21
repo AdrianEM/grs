@@ -99,7 +99,7 @@ class UserSettings(TimeStampedModel):
     profile_view = models.CharField(choices=PROFILE_PERMISSIONS_VIEW, help_text=_('profile_view'),
                                     db_column='ProfileView', default='G', max_length=2)
     # Site customization
-    recommendations = models.BooleanField(default=True, db_column='Recomendations', help_text=_('Recommendations'))
+    recommendations = models.BooleanField(default=True, db_column='Recommendations', help_text=_('Recommendations'))
     language = models.CharField(choices=LANGUAGES, max_length=2, db_column='Language', help_text=_('Language'))
 
     class Meta:
@@ -228,6 +228,9 @@ class EmailSettings(TimeStampedModel):
                                                                db_column='MonthlyNewReleaseOnlyAuthorRead',
                                                                help_text=_('monthly_new_release_only_author_read'))
     new_features_gr = models.BooleanField(default=True, help_text=_('new_features_gr'), db_column='NewFeaturesGr')
+    new_offers = models.BooleanField(default=False, help_text=_('new_offers'), db_column='NewOffers')
+    books_authors_events = models.BooleanField(default=False, help_text=_('books_authors_events'),
+                                               db_column='BooksAuthorsEvents')
     update_giveaway_won = models.BooleanField(default=True, help_text=_('update_giveaway_won'),
                                               db_column='UpdateGiveawayWon')
     update_giveaway_entered = models.BooleanField(default=True, help_text=_('update_giveaway_entered'),
